@@ -1,7 +1,6 @@
 # Comptroller global variables
 type Comptroller @entity {
-    "ID is set to 1"
-    id: ID!
+    id: String!
     "Address of price oracle the comptroller uses"
     priceOracle: Bytes
     "Factor used to determine repayAmount for liquidating"
@@ -14,6 +13,8 @@ type Comptroller @entity {
 
 # Market inforamtion for a CToken
 type Market @entity { # TODO rename to CToken, not market AND ALL OTHERS
+    "CToken address"
+    id: String!
     #Fields that match compounds API
     "Yearly borrow rate. With 2102400 blocks per year"
     borrowRate: BigDecimal!
@@ -28,17 +29,15 @@ type Market @entity { # TODO rename to CToken, not market AND ALL OTHERS
     "Name of the cToken"
     name: String!
     "Number of borrowers active in the market"
-    numberOfBorrowers: Int!
+    numberOfBorrowers: BigInt!
     "Number of suppliers active in the market"
-    numberOfSuppliers: Int!
+    numberOfSuppliers: BigInt!
     "Reserves stored in the contract"
     reserves: BigDecimal!
     "Yearly supply rate. With 2104400 blocks per year"
     supplyRate: BigDecimal!
     "CToken symbol"
     symbol: String!
-    "CToken address"
-    id: ID!
     "Borrows in the market"
     totalBorrows: BigDecimal!
     "CToken supply. CTokens have 8 decimals"
@@ -54,9 +53,9 @@ type Market @entity { # TODO rename to CToken, not market AND ALL OTHERS
 
     # Fields that are not in compounds api
     "Block the market is updated to"
-    accrualBlockNumber: Int!
+    accrualBlockNumber: BigInt!
     "Timestamp the market was most recently updated"
-    blockTimestamp: Int!
+    blockTimestamp: BigInt!
     "The history of the markets borrow index return (Think S&P 500)"
     borrowIndex: BigDecimal!
     "The factor determining interest that goes to reserves"
@@ -70,13 +69,13 @@ type Market @entity { # TODO rename to CToken, not market AND ALL OTHERS
 # Users within the protocol
 type Account @entity {
     "User ETH address"
-    id: ID!
+    id: String!
     "Array of CTokens user is in"
     tokens: [AccountCToken!]! @derivedFrom(field: "account")
     "Count user has been liquidated"
-    countLiquidated: Int!
+    countLiquidated: BigInt!
     "Count user has liquidated others"
-    countLiquidator: Int!
+    countLiquidator: BigInt!
     "True if user has ever borrowed"
     hasBorrowed: Boolean!
 
@@ -95,7 +94,7 @@ type Account @entity {
 # Stats for an accounts borrow and supply of an asset
 type AccountCToken @entity {
     "Concatenation of CToken address and user address"
-    id: ID!
+    id: String!
     "Relation to market"
     market: Market!
     "Symbol of the cToken"
@@ -105,9 +104,9 @@ type AccountCToken @entity {
     "Hashes of all user transactions"
     transactionHashes: [Bytes!]!
     "Times of all user transactions"
-    transactionTimes: [Int!]!
+    transactionTimes: [BigInt!]!
     "Block number this asset was updated at in the contract"
-    accrualBlockNumber: Int!
+    accrualBlockNumber: BigInt!
     "True if user is entered, false if they are exited"
     enteredMarket: Boolean!
 
@@ -141,4 +140,27 @@ type AccountCToken @entity {
 
     # lifetimeBorrowInterestAccrued: BigDecimal!
     # FORMULA: lifetimeBorrowInterestAccrued = borrowBalanceUnderlying - totalUnderlyingBorrowed + totalUnderlyingRepaid
+}
+
+
+### Proposals ###
+
+enum ProposalStatus {
+  Active
+  Canceled
+  Queued
+  Executed
+}
+
+type Proposal @entity {
+  id: String!
+  status: ProposalStatus!
+  proposer: Account!
+  targets: [Account!]!
+  values: [BigInt!]!
+  signatures: [String!]!
+  calldatas: [Bytes!]!
+  startBlock: BigInt!
+  endBlock: BigInt!
+  description: String!
 }

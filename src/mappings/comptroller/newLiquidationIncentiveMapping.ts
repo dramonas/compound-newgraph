@@ -1,15 +1,9 @@
-import { log } from "@graphprotocol/graph-ts";
 import { NewLiquidationIncentive } from "../../types/Comptroller/Comptroller";
-import { Comptroller } from "../../types/schema";
+import { getComptroller } from "../../utils";
 
+// This should be the first event acccording to etherscan but it isn't.... price oracle is. weird
 export function handleNewLiquidationIncentive(event: NewLiquidationIncentive): void {
-  const comptroller = Comptroller.load("1");
-
-  if (!comptroller) {
-    log.info("Comptroller(1) not found", []);
-    return;
-  }
-
+  const comptroller = getComptroller();
   comptroller.liquidationIncentive = event.params.newLiquidationIncentiveMantissa;
   comptroller.save();
 }
